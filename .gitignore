@@ -1,0 +1,16 @@
+build
+
+target
+target_onetime
+syntax: glob
+*.ipr
+*.iws
+*.iml
+nbactions.xml
+atlassian-ide-plugin.xml
+.idea
+
+tests_out
+*.out
+
+*.log
