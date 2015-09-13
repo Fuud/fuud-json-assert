@@ -34,7 +34,7 @@ public class JsonAsserts {
 
         checkEqualsImpl(expectedJson, actualJson, 0);
         if (!lineToFailure.isEmpty()) {
-            throw new AssertionError(glueRendering());
+            throw new AssertionError("\n"+glueRendering());
         }
     }
 
@@ -47,7 +47,7 @@ public class JsonAsserts {
 
         int maxFailureReasonLength = 0;
         for (String failure : lineToFailure.values()) {
-            maxFailureReasonLength = Math.max(failure.length(), maxExpectedLineLength);
+            maxFailureReasonLength = Math.max(failure.length(), maxFailureReasonLength);
         }
         maxFailureReasonLength += 2;
 
@@ -106,7 +106,7 @@ public class JsonAsserts {
                 renderMissingActual(ident, expectedValue, "", isLastElementInExpected);
             } else {
                 Object actualValue = actualJson.get(i);
-                checkEquals(ident, expectedValue, actualValue, "", isLastElementInExpected, isLastElementInActual);
+                checkEquals(ident, expectedValue, actualValue, spaces(ident), isLastElementInExpected, isLastElementInActual);
             }
         }
     }
