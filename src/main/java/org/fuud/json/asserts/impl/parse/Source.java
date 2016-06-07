@@ -47,7 +47,7 @@ public class Source {
     public String readChars(int count) throws EOFException {
         String result = "";
         for (int i = 0; i < count; i++) {
-            result += readNextChar();
+            result += readNextChar().getCharacter();
         }
         return result;
     }

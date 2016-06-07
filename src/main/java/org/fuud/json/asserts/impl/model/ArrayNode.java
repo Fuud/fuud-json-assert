@@ -1,5 +1,6 @@
 package org.fuud.json.asserts.impl.model;
 
+import org.fuud.json.asserts.impl.diff.Difference;
 import org.fuud.json.asserts.impl.parse.CharAndPosition;
 import org.fuud.json.asserts.impl.parse.JsonParseException;
 import org.fuud.json.asserts.impl.parse.Source;
@@ -9,7 +10,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 
 public class ArrayNode implements ValueNode, Node {
     private final List<ValueNode> elements;
@@ -24,9 +29,9 @@ public class ArrayNode implements ValueNode, Node {
 
     @Override
     public String toString() {
-        return "[" +
+        return "[\n" +
                 elements.stream().map(Object::toString).map(Utils.addIdent).collect(Collectors.joining(",\n")) +
-                "]";
+                "\n]";
     }
 
     @Override
@@ -77,5 +82,35 @@ public class ArrayNode implements ValueNode, Node {
 
     public static boolean canStartWith(char firstChar) {
         return firstChar == '[';
+    }
+
+    @Override
+    public List<Difference> compare(Node other) {
+        if (other instanceof ArrayNode) {
+            ArrayNode right = (ArrayNode) other;
+
+            final List<ValueNode> leftPropertyNames = this.elements;
+            final List<ValueNode> rightPropertyNames = right.elements;
+
+            List<Difference> result = new ArrayList<>();
+            for (int i = 0; i < Math.max(leftPropertyNames.size(), rightPropertyNames.size()); i++) {
+                String pathElement = "" + i;
+                if (i < leftPropertyNames.size() && i < rightPropertyNames.size()) {
+                    final List<Difference> differences = this.elements.get(i).compare(right.elements.get(i));
+                    result.addAll(differences.
+                            stream().
+                            map(Difference.addParentPath(pathElement)).
+                            collect(Collectors.toList()));
+                } else if (i >= leftPropertyNames.size()) {
+                    result.add(new Difference(singletonList(pathElement), Difference.DiffType.NOT_EXPECTED));
+                } else if (i >= rightPropertyNames.size()) {
+                    result.add(new Difference(singletonList(pathElement), Difference.DiffType.MISSING));
+                }
+            }
+            return result;
+
+        } else {
+            return singletonList(new Difference(emptyList(), Difference.DiffType.TYPE_MISMATCH));
+        }
     }
 }

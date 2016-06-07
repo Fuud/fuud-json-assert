@@ -1,11 +1,17 @@
 package org.fuud.json.asserts.impl.model;
 
+import org.fuud.json.asserts.impl.diff.Difference;
 import org.fuud.json.asserts.impl.parse.CharAndPosition;
 import org.fuud.json.asserts.impl.parse.JsonParseException;
 import org.fuud.json.asserts.impl.parse.Source;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
+
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 
 public class StringNode implements ValueNode, Node {
     private final String value;
@@ -94,5 +100,19 @@ public class StringNode implements ValueNode, Node {
 
     public static boolean canStartWith(char firstChar) {
         return firstChar == '"';
+    }
+
+    @Override
+    public List<Difference> compare(Node other) {
+        if (other instanceof StringNode) {
+            StringNode right = (StringNode) other;
+            if (right.getValue().equals(this.getValue())) {
+                return emptyList();
+            } else {
+                return singletonList(new Difference(emptyList(), Difference.DiffType.NOT_EQUALS));
+            }
+        } else {
+            return singletonList(new Difference(emptyList(), Difference.DiffType.TYPE_MISMATCH));
+        }
     }
 }

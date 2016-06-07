@@ -1,10 +1,15 @@
 package org.fuud.json.asserts.impl.model;
 
+import org.fuud.json.asserts.impl.diff.Difference;
 import org.fuud.json.asserts.impl.parse.CharAndPosition;
 import org.fuud.json.asserts.impl.parse.JsonParseException;
 import org.fuud.json.asserts.impl.parse.Source;
 
 import java.io.IOException;
+import java.util.List;
+
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 
 public class BooleanNode implements ValueNode, Node {
     private final boolean value;
@@ -59,5 +64,19 @@ public class BooleanNode implements ValueNode, Node {
 
     public static boolean canStartWith(char firstChar) {
         return firstChar == 't' || firstChar == 'f';
+    }
+
+    @Override
+    public List<Difference> compare(Node other) {
+        if (other instanceof BooleanNode) {
+            BooleanNode right = (BooleanNode) other;
+            if (right.value == this.value) {
+                return emptyList();
+            } else {
+                return singletonList(new Difference(emptyList(), Difference.DiffType.NOT_EQUALS));
+            }
+        } else {
+            return singletonList(new Difference(emptyList(), Difference.DiffType.TYPE_MISMATCH));
+        }
     }
 }

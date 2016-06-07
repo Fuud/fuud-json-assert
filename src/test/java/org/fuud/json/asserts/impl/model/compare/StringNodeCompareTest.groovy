@@ -1,0 +1,55 @@
+package org.fuud.json.asserts.impl.model.compare
+
+import org.fuud.json.asserts.impl.diff.Difference
+import org.fuud.json.asserts.impl.model.BooleanNode
+import org.fuud.json.asserts.impl.model.Node
+import org.fuud.json.asserts.impl.model.NullNode
+import org.fuud.json.asserts.impl.model.NumberNode
+import org.fuud.json.asserts.impl.model.ObjectNode
+import org.fuud.json.asserts.impl.model.ObjectPropertyNode
+import org.fuud.json.asserts.impl.model.StringNode
+import spock.lang.Specification
+import spock.lang.Unroll
+
+class StringNodeCompareTest extends Specification {
+
+    @Unroll
+    def "type mismatch"(Node right) {
+        when:
+            StringNode left = new StringNode("some text")
+            List<Difference> differences = left.compare(right)
+
+        then:
+            differences == [new Difference([], Difference.DiffType.TYPE_MISMATCH)]
+
+        where:
+            right                                                                          | _
+            new BooleanNode(true)                                                          | _
+            new NullNode()                                                                 | _
+            new NumberNode(123.5)                                                          | _
+            new ObjectNode([])                                                             | _
+            new ObjectPropertyNode("this comparison should never happen", new NullNode()) | _
+    }
+
+    @Unroll
+    def "not equals"(){
+        when:
+            StringNode left = new StringNode("a")
+            StringNode right = new StringNode("b")
+            List<Difference> differences = left.compare(right)
+
+        then:
+            differences == [new Difference([], Difference.DiffType.NOT_EQUALS)]
+    }
+
+    @Unroll
+    def "equals"(){
+        when:
+            StringNode left = new StringNode("a")
+            StringNode right = new StringNode("a")
+            List<Difference> differences = left.compare(right)
+
+        then:
+            differences == []
+    }
+}

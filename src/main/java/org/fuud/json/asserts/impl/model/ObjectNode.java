@@ -1,31 +1,40 @@
 package org.fuud.json.asserts.impl.model;
 
+import org.fuud.json.asserts.impl.diff.Difference;
 import org.fuud.json.asserts.impl.parse.CharAndPosition;
 import org.fuud.json.asserts.impl.parse.JsonParseException;
 import org.fuud.json.asserts.impl.parse.Source;
 import org.fuud.json.asserts.impl.util.Utils;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+
 public class ObjectNode implements ValueNode, Node {
-    private final List<ObjectPropertyNode> children;
+    private final Map<String, ObjectPropertyNode> children;
 
     public ObjectNode(List<ObjectPropertyNode> children) {
-        this.children = children;
+        this.children = new HashMap<>();
+        for (ObjectPropertyNode child : children) {
+            if (this.children.containsKey(child.getName())) {
+                throw new IllegalStateException("Property with key " + child.getName() + " already exists");
+            }
+            this.children.put(child.getName(), child);
+        }
     }
 
     public List<ObjectPropertyNode> getChildren() {
-        return children;
+        return new ArrayList<>(children.values());
     }
 
     @Override
     public String toString() {
-        return "{" +
-                children.stream().map(Object::toString).map(Utils.addIdent).collect(Collectors.joining(",\n")) +
-                "}";
+        return "{\n" +
+                children.values().stream().map(Object::toString).map(Utils.addIdent).collect(Collectors.joining(",\n")) +
+                "\n}";
     }
 
     @Override
@@ -76,5 +85,49 @@ public class ObjectNode implements ValueNode, Node {
 
     public static boolean canStartWith(char firstChar) {
         return firstChar == '{';
+    }
+
+    @Override
+    public List<Difference> compare(Node other) {
+        if (other instanceof ObjectNode) {
+            ObjectNode right = (ObjectNode) other;
+
+            final Set<String> leftPropertyNames = this.children.keySet();
+            final Set<String> rightPropertyNames = right.children.keySet();
+
+            final Set<String> missingPropertiesNames = diff(leftPropertyNames, rightPropertyNames);
+            final Set<String> notExpectedPropertiesNames = diff(rightPropertyNames, leftPropertyNames);
+            final Set<String> toCheckEqualityPropertyNames = diff(leftPropertyNames, missingPropertiesNames);
+
+            List<Difference> result = new ArrayList<>();
+            result.addAll(
+                    missingPropertiesNames.
+                            stream().
+                            map(name -> new Difference(singletonList(name), Difference.DiffType.MISSING)).
+                            collect(Collectors.toList()));
+
+            result.addAll(
+                    notExpectedPropertiesNames.
+                            stream().
+                            map(name -> new Difference(singletonList(name), Difference.DiffType.NOT_EXPECTED)).
+                            collect(Collectors.toList()));
+
+            result.addAll(
+                    children.values().
+                            stream().
+                            filter(objectPropertyNode -> toCheckEqualityPropertyNames.contains(objectPropertyNode.getName())).
+                            flatMap(objectPropertyNode -> objectPropertyNode.compare(right.children.get(objectPropertyNode.getName())).stream()).
+                            collect(Collectors.toList()));
+            return result;
+
+        } else {
+            return singletonList(new Difference(emptyList(), Difference.DiffType.TYPE_MISMATCH));
+        }
+    }
+
+    private Set<String> diff(Set<String> set1, Set<String> set2) {
+        Set<String> result = new HashSet<>(set1);
+        result.removeAll(set2);
+        return result;
     }
 }
