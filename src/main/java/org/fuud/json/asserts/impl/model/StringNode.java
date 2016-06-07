@@ -1,6 +1,7 @@
 package org.fuud.json.asserts.impl.model;
 
 import org.fuud.json.asserts.impl.diff.Difference;
+import org.fuud.json.asserts.impl.diff.JsonComparator;
 import org.fuud.json.asserts.impl.parse.CharAndPosition;
 import org.fuud.json.asserts.impl.parse.JsonParseException;
 import org.fuud.json.asserts.impl.parse.Source;
@@ -13,10 +14,11 @@ import java.util.Objects;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
-public class StringNode implements ValueNode, Node {
+public class StringNode extends ValueNode<StringNode> {
     private final String value;
 
     public StringNode(String value) {
+        super(new StringNodeComparator());
         this.value = Objects.requireNonNull(value);
     }
 
@@ -102,17 +104,19 @@ public class StringNode implements ValueNode, Node {
         return firstChar == '"';
     }
 
-    @Override
-    public List<Difference> compare(Node other) {
-        if (other instanceof StringNode) {
-            StringNode right = (StringNode) other;
-            if (right.getValue().equals(this.getValue())) {
-                return emptyList();
+    public static class StringNodeComparator implements JsonComparator<StringNode> {
+        @Override
+        public List<Difference> compare(StringNode leftNode, Node rightNode) {
+            if (rightNode instanceof StringNode) {
+                StringNode right = (StringNode) rightNode;
+                if (right.getValue().equals(leftNode.getValue())) {
+                    return emptyList();
+                } else {
+                    return singletonList(new Difference(emptyList(), Difference.DiffType.NOT_EQUALS));
+                }
             } else {
-                return singletonList(new Difference(emptyList(), Difference.DiffType.NOT_EQUALS));
+                return singletonList(new Difference(emptyList(), Difference.DiffType.TYPE_MISMATCH));
             }
-        } else {
-            return singletonList(new Difference(emptyList(), Difference.DiffType.TYPE_MISMATCH));
         }
     }
 }

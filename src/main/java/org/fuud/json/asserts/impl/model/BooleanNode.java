@@ -1,6 +1,7 @@
 package org.fuud.json.asserts.impl.model;
 
 import org.fuud.json.asserts.impl.diff.Difference;
+import org.fuud.json.asserts.impl.diff.JsonComparator;
 import org.fuud.json.asserts.impl.parse.CharAndPosition;
 import org.fuud.json.asserts.impl.parse.JsonParseException;
 import org.fuud.json.asserts.impl.parse.Source;
@@ -11,10 +12,11 @@ import java.util.List;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
-public class BooleanNode implements ValueNode, Node {
+public class BooleanNode extends ValueNode<BooleanNode> {
     private final boolean value;
 
     public BooleanNode(boolean value) {
+        super(new BooleanNodeComparator());
         this.value = value;
     }
 
@@ -66,17 +68,19 @@ public class BooleanNode implements ValueNode, Node {
         return firstChar == 't' || firstChar == 'f';
     }
 
-    @Override
-    public List<Difference> compare(Node other) {
-        if (other instanceof BooleanNode) {
-            BooleanNode right = (BooleanNode) other;
-            if (right.value == this.value) {
-                return emptyList();
+    public static class BooleanNodeComparator implements JsonComparator<BooleanNode> {
+        @Override
+        public List<Difference> compare(BooleanNode leftNode, Node rightNode) {
+            if (rightNode instanceof BooleanNode) {
+                BooleanNode right = (BooleanNode) rightNode;
+                if (right.value == leftNode.value) {
+                    return emptyList();
+                } else {
+                    return singletonList(new Difference(emptyList(), Difference.DiffType.NOT_EQUALS));
+                }
             } else {
-                return singletonList(new Difference(emptyList(), Difference.DiffType.NOT_EQUALS));
+                return singletonList(new Difference(emptyList(), Difference.DiffType.TYPE_MISMATCH));
             }
-        } else {
-            return singletonList(new Difference(emptyList(), Difference.DiffType.TYPE_MISMATCH));
         }
     }
 }

@@ -1,13 +1,18 @@
 package org.fuud.json.asserts.impl.model;
 
+import org.fuud.json.asserts.impl.diff.JsonComparator;
 import org.fuud.json.asserts.impl.parse.CharAndPosition;
 import org.fuud.json.asserts.impl.parse.JsonParseException;
 import org.fuud.json.asserts.impl.parse.Source;
 
 import java.io.IOException;
 
-public interface ValueNode extends Node {
-    static ValueNode parse(Source source) throws IOException {
+public abstract class ValueNode<TThis extends ValueNode<TThis>> extends Node<TThis> {
+    public ValueNode(JsonComparator<TThis> comparator) {
+        super(comparator);
+    }
+
+    static ValueNode<?> parse(Source source) throws IOException {
         final CharAndPosition firstCharAndPos = source.lookupForNextNonSpaceChar();
         final char firstChar = firstCharAndPos.getCharacter();
 

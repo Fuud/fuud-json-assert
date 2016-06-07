@@ -1,16 +1,23 @@
 package org.fuud.json.asserts.impl.model;
 
+import org.fuud.json.asserts.impl.diff.Difference;
+import org.fuud.json.asserts.impl.diff.JsonComparator;
 import org.fuud.json.asserts.impl.parse.JsonParseException;
 import org.fuud.json.asserts.impl.parse.Source;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Objects;
 
-public class NumberNode implements ValueNode, Node {
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+
+public class NumberNode extends ValueNode<NumberNode> {
     private final BigDecimal value;
 
     public NumberNode(BigDecimal value) {
+        super(new NumberNodeComparator());
         this.value = Objects.requireNonNull(value);
     }
 
@@ -58,5 +65,21 @@ public class NumberNode implements ValueNode, Node {
 
     public static boolean canStartWith(char firstChar) {
         return Character.isDigit(firstChar) || firstChar == '+' || firstChar == '-';
+    }
+
+    public static class NumberNodeComparator implements JsonComparator<NumberNode> {
+        @Override
+        public List<Difference> compare(NumberNode leftNode, Node rightNode) {
+            if (rightNode instanceof NumberNode) {
+                NumberNode right = (NumberNode) rightNode;
+                if (right.value.compareTo(leftNode.value) == 0) {
+                    return emptyList();
+                } else {
+                    return singletonList(new Difference(emptyList(), Difference.DiffType.NOT_EQUALS));
+                }
+            } else {
+                return singletonList(new Difference(emptyList(), Difference.DiffType.TYPE_MISMATCH));
+            }
+        }
     }
 }

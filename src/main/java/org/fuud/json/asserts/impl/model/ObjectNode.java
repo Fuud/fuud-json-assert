@@ -1,6 +1,7 @@
 package org.fuud.json.asserts.impl.model;
 
 import org.fuud.json.asserts.impl.diff.Difference;
+import org.fuud.json.asserts.impl.diff.JsonComparator;
 import org.fuud.json.asserts.impl.parse.CharAndPosition;
 import org.fuud.json.asserts.impl.parse.JsonParseException;
 import org.fuud.json.asserts.impl.parse.Source;
@@ -13,10 +14,11 @@ import java.util.stream.Collectors;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
-public class ObjectNode implements ValueNode, Node {
+public class ObjectNode extends ValueNode<ObjectNode> {
     private final Map<String, ObjectPropertyNode> children;
 
     public ObjectNode(List<ObjectPropertyNode> children) {
+        super(new ObjectNodeComparator());
         this.children = new HashMap<>();
         for (ObjectPropertyNode child : children) {
             if (this.children.containsKey(child.getName())) {
@@ -87,47 +89,50 @@ public class ObjectNode implements ValueNode, Node {
         return firstChar == '{';
     }
 
-    @Override
-    public List<Difference> compare(Node other) {
-        if (other instanceof ObjectNode) {
-            ObjectNode right = (ObjectNode) other;
+    public static class ObjectNodeComparator implements JsonComparator<ObjectNode> {
+        @Override
+        public List<Difference> compare(ObjectNode leftNode, Node rightNode) {
+            if (rightNode instanceof ObjectNode) {
+                ObjectNode right = (ObjectNode) rightNode;
 
-            final Set<String> leftPropertyNames = this.children.keySet();
-            final Set<String> rightPropertyNames = right.children.keySet();
+                final Set<String> leftPropertyNames = leftNode.children.keySet();
+                final Set<String> rightPropertyNames = right.children.keySet();
 
-            final Set<String> missingPropertiesNames = diff(leftPropertyNames, rightPropertyNames);
-            final Set<String> notExpectedPropertiesNames = diff(rightPropertyNames, leftPropertyNames);
-            final Set<String> toCheckEqualityPropertyNames = diff(leftPropertyNames, missingPropertiesNames);
+                final Set<String> missingPropertiesNames = diff(leftPropertyNames, rightPropertyNames);
+                final Set<String> notExpectedPropertiesNames = diff(rightPropertyNames, leftPropertyNames);
+                final Set<String> toCheckEqualityPropertyNames = diff(leftPropertyNames, missingPropertiesNames);
 
-            List<Difference> result = new ArrayList<>();
-            result.addAll(
-                    missingPropertiesNames.
-                            stream().
-                            map(name -> new Difference(singletonList(name), Difference.DiffType.MISSING)).
-                            collect(Collectors.toList()));
+                List<Difference> result = new ArrayList<>();
+                result.addAll(
+                        missingPropertiesNames.
+                                stream().
+                                map(name -> new Difference(singletonList(name), Difference.DiffType.MISSING)).
+                                collect(Collectors.toList()));
 
-            result.addAll(
-                    notExpectedPropertiesNames.
-                            stream().
-                            map(name -> new Difference(singletonList(name), Difference.DiffType.NOT_EXPECTED)).
-                            collect(Collectors.toList()));
+                result.addAll(
+                        notExpectedPropertiesNames.
+                                stream().
+                                map(name -> new Difference(singletonList(name), Difference.DiffType.NOT_EXPECTED)).
+                                collect(Collectors.toList()));
 
-            result.addAll(
-                    children.values().
-                            stream().
-                            filter(objectPropertyNode -> toCheckEqualityPropertyNames.contains(objectPropertyNode.getName())).
-                            flatMap(objectPropertyNode -> objectPropertyNode.compare(right.children.get(objectPropertyNode.getName())).stream()).
-                            collect(Collectors.toList()));
+                result.addAll(
+                        leftNode.children.values().
+                                stream().
+                                filter(objectPropertyNode -> toCheckEqualityPropertyNames.contains(objectPropertyNode.getName())).
+                                flatMap(objectPropertyNode -> objectPropertyNode.compare(right.children.get(objectPropertyNode.getName())).stream()).
+                                collect(Collectors.toList()));
+                return result;
+
+            } else {
+                return singletonList(new Difference(emptyList(), Difference.DiffType.TYPE_MISMATCH));
+            }
+        }
+
+        private static Set<String> diff(Set<String> set1, Set<String> set2) {
+            Set<String> result = new HashSet<>(set1);
+            result.removeAll(set2);
             return result;
-
-        } else {
-            return singletonList(new Difference(emptyList(), Difference.DiffType.TYPE_MISMATCH));
         }
     }
 
-    private Set<String> diff(Set<String> set1, Set<String> set2) {
-        Set<String> result = new HashSet<>(set1);
-        result.removeAll(set2);
-        return result;
-    }
 }

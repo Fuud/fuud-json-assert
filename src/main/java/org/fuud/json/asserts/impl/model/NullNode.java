@@ -1,17 +1,21 @@
 package org.fuud.json.asserts.impl.model;
 
 import org.fuud.json.asserts.impl.diff.Difference;
+import org.fuud.json.asserts.impl.diff.JsonComparator;
 import org.fuud.json.asserts.impl.parse.CharAndPosition;
 import org.fuud.json.asserts.impl.parse.Source;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.util.List;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
-public class NullNode implements ValueNode, Node {
+public class NullNode extends ValueNode<NullNode> {
+    public NullNode() {
+        super(new NullNodeComparator());
+    }
+
     @Override
     public String toString() {
         return "null";
@@ -44,12 +48,14 @@ public class NullNode implements ValueNode, Node {
         return firstChar == 'n';
     }
 
-    @Override
-    public List<Difference> compare(Node other) {
-        if (other instanceof NullNode) {
-            return emptyList();
-        } else {
-            return singletonList(new Difference(emptyList(), Difference.DiffType.TYPE_MISMATCH));
+    public static class NullNodeComparator implements JsonComparator<NullNode> {
+        @Override
+        public List<Difference> compare(NullNode leftNode, Node rightNode) {
+            if (rightNode instanceof NullNode) {
+                return emptyList();
+            } else {
+                return singletonList(new Difference(emptyList(), Difference.DiffType.TYPE_MISMATCH));
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 package org.fuud.json.asserts.impl.model.compare
 
 import org.fuud.json.asserts.impl.diff.Difference
+import org.fuud.json.asserts.impl.diff.JsonComparator
 import org.fuud.json.asserts.impl.model.*
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -31,12 +32,12 @@ class ObjectPropertyNodeCompareTest extends Specification {
     @Unroll
     def "values not equals"(List<Difference> valueDifference, List<Difference> expectedDifferences) {
         when:
-            ObjectPropertyNode left = new ObjectPropertyNode("property1", new Node() {
+            ObjectPropertyNode left = new ObjectPropertyNode("property1", new Node(new JsonComparator<Node>() {
                 @Override
-                List<Difference> compare(Node other) {
-                    return valueDifference
+                List<Difference> compare(Node left, Node rightNode) {
+                    return valueDifference;
                 }
-            })
+            }));
             ObjectPropertyNode right = new ObjectPropertyNode("property1", new NullNode())
             List<Difference> differences = left.compare(right)
 
