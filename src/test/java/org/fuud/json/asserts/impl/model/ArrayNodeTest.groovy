@@ -10,16 +10,14 @@ import spock.lang.Specification
 class ArrayNodeTest extends Specification {
     def "test valid array #json"(String json, ArrayNode expected) {
         when:
-            ArrayNode parsed = ValueNode.parse(new Source(json), new Context())
+            ArrayNode parsed = ArrayNode.parse(new Source(json))
         then:
             parsed == expected
         where:
-            json                                    | expected
-            '[]'                                    | new ArrayNode([])
-            '/*this is \n multiline \n comment*/[]' | new ArrayNode([])
-            '// this is one line comment \n []'     | new ArrayNode([])
-            '["a"]'                                 | new ArrayNode([new StringNode("a")])
-            '[{"a":"b"}, ["c", "d"]]'               | new ArrayNode([new ObjectNode([new ObjectPropertyNode("a", new StringNode("b"))]), new ArrayNode([new StringNode("c"), new StringNode("d")])])
+            json                      | expected
+            '[]'                      | new ArrayNode([])
+            '["a"]'                   | new ArrayNode([new StringNode("a")])
+            '[{"a":"b"}, ["c", "d"]]' | new ArrayNode([new ObjectNode([new ObjectPropertyNode("a", new StringNode("b"))]), new ArrayNode([new StringNode("c"), new StringNode("d")])])
 
     }
 }

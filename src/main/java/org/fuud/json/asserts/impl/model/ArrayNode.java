@@ -19,10 +19,16 @@ import static java.util.Collections.singletonList;
 
 public class ArrayNode extends ValueNode<ArrayNode> {
     private final List<ValueNode<?>> elements;
+    private final List<CommentNode> commentNodes;
 
     public ArrayNode(List<ValueNode<?>> elements) {
-        super(new ArrayNodeJsonComparator());
-        this.elements = Objects.requireNonNull(elements);
+        this(elements, new ArrayNodeJsonComparator(), new ArrayList<>());
+    }
+
+    public ArrayNode(List<ValueNode<?>> elements, JsonComparator<ArrayNode> comparator, List<CommentNode> commentNodes) {
+        super(comparator);
+        this.elements = elements;
+        this.commentNodes = commentNodes;
     }
 
     public List<ValueNode<?>> getElements() {
@@ -31,7 +37,9 @@ public class ArrayNode extends ValueNode<ArrayNode> {
 
     @Override
     public String toString() {
-        return "[\n" +
+        return "" +
+                commentNodes.stream().map(comment -> comment + "\n").collect(Collectors.joining()) +
+                "[\n" +
                 elements.stream().map(Object::toString).map(Utils.addIdent).collect(Collectors.joining(",\n")) +
                 "\n]";
     }
@@ -52,7 +60,14 @@ public class ArrayNode extends ValueNode<ArrayNode> {
         return elements.hashCode();
     }
 
-    public static ArrayNode parse(Source source, Context context) throws IOException {
+    public static ArrayNode parse(Source source) throws IOException {
+        return parse(source, new Context(), emptyList());
+    }
+
+    public static ArrayNode parse(Source source, Context context, List<CommentNode> commentNodes) throws IOException {
+        final List<String> args = commentNodes.stream().flatMap(commentNode -> commentNode.getAnnotations().stream()).collect(Collectors.toList());
+        final JsonComparator<ArrayNode> comparator = context.getArrayNodeComparatorCreator().create(args);
+
         final CharAndPosition startChar = source.readNextNonSpaceChar();
         if (startChar.getCharacter() != '[') {
             throw new JsonParseException("[", startChar);
@@ -61,7 +76,9 @@ public class ArrayNode extends ValueNode<ArrayNode> {
         final CharAndPosition mayBeEnd = source.lookupForNextNonSpaceChar();
         if (mayBeEnd.getCharacter() == ']') {
             source.readNextNonSpaceChar(); // skip up to ']'
-            return new ArrayNode(new ArrayList<>());
+            return new ArrayNode(new ArrayList<>(),
+                    comparator,
+                    commentNodes);
         }
 
         List<ValueNode<?>> values = new ArrayList<>();
@@ -78,8 +95,9 @@ public class ArrayNode extends ValueNode<ArrayNode> {
                 throw new JsonParseException("],", delimiterOrEndChar);
             }
         }
-
-        return new ArrayNode(values);
+        return new ArrayNode(values,
+                comparator,
+                commentNodes);
     }
 
     public static boolean canStartWith(char firstChar) {

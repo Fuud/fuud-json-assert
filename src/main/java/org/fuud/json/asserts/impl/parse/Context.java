@@ -4,67 +4,67 @@ import org.fuud.json.asserts.impl.diff.ComparatorCreator;
 import org.fuud.json.asserts.impl.model.*;
 
 public class Context {
-    private ComparatorCreator arrayNodeComparatorCreator = args -> new ArrayNode.ArrayNodeJsonComparator();
-    private ComparatorCreator booleanNodeComparatorCreator = args -> new BooleanNode.BooleanNodeComparator();
-    private ComparatorCreator nullNodeComparatorCreator = args -> new NullNode.NullNodeComparator();
-    private ComparatorCreator numberNodeComparatorCreator = args -> new NumberNode.NumberNodeComparator();
-    private ComparatorCreator objectNodeComparatorCreator = args -> new ObjectNode.ObjectNodeComparator();
-    private ComparatorCreator objectPropertyNodeComparatorCreator = args -> new ObjectPropertyNode.ObjectPropertyNodeComparator();
-    private ComparatorCreator stringNodeComparatorCreator = args -> new StringNode.StringNodeComparator();
+    private ComparatorCreator<ArrayNode> arrayNodeComparatorCreator = args -> new ArrayNode.ArrayNodeJsonComparator();
+    private ComparatorCreator<BooleanNode> booleanNodeComparatorCreator = args -> new BooleanNode.BooleanNodeComparator();
+    private ComparatorCreator<NullNode> nullNodeComparatorCreator = args -> new NullNode.NullNodeComparator();
+    private ComparatorCreator<NumberNode> numberNodeComparatorCreator = args -> new NumberNode.NumberNodeComparator();
+    private ComparatorCreator<ObjectNode> objectNodeComparatorCreator = args -> new ObjectNode.ObjectNodeComparator();
+    private ComparatorCreator<ObjectPropertyNode> objectPropertyNodeComparatorCreator = args -> new ObjectPropertyNode.ObjectPropertyNodeComparator();
+    private ComparatorCreator<StringNode> stringNodeComparatorCreator = args -> new StringNode.StringNodeComparator();
 
-    public ComparatorCreator getArrayNodeComparatorCreator() {
+    public ComparatorCreator<ArrayNode> getArrayNodeComparatorCreator() {
         return arrayNodeComparatorCreator;
     }
 
-    public void setArrayNodeComparatorCreator(ComparatorCreator arrayNodeComparatorCreator) {
+    public void setArrayNodeComparatorCreator(ComparatorCreator<ArrayNode> arrayNodeComparatorCreator) {
         this.arrayNodeComparatorCreator = arrayNodeComparatorCreator;
     }
 
-    public ComparatorCreator getBooleanNodeComparatorCreator() {
+    public ComparatorCreator<BooleanNode> getBooleanNodeComparatorCreator() {
         return booleanNodeComparatorCreator;
     }
 
-    public void setBooleanNodeComparatorCreator(ComparatorCreator booleanNodeComparatorCreator) {
+    public void setBooleanNodeComparatorCreator(ComparatorCreator<BooleanNode> booleanNodeComparatorCreator) {
         this.booleanNodeComparatorCreator = booleanNodeComparatorCreator;
     }
 
-    public ComparatorCreator getNullNodeComparatorCreator() {
+    public ComparatorCreator<NullNode> getNullNodeComparatorCreator() {
         return nullNodeComparatorCreator;
     }
 
-    public void setNullNodeComparatorCreator(ComparatorCreator nullNodeComparatorCreator) {
+    public void setNullNodeComparatorCreator(ComparatorCreator<NullNode> nullNodeComparatorCreator) {
         this.nullNodeComparatorCreator = nullNodeComparatorCreator;
     }
 
-    public ComparatorCreator getNumberNodeComparatorCreator() {
+    public ComparatorCreator<NumberNode> getNumberNodeComparatorCreator() {
         return numberNodeComparatorCreator;
     }
 
-    public void setNumberNodeComparatorCreator(ComparatorCreator numberNodeComparatorCreator) {
+    public void setNumberNodeComparatorCreator(ComparatorCreator<NumberNode> numberNodeComparatorCreator) {
         this.numberNodeComparatorCreator = numberNodeComparatorCreator;
     }
 
-    public ComparatorCreator getObjectNodeComparatorCreator() {
+    public ComparatorCreator<ObjectNode> getObjectNodeComparatorCreator() {
         return objectNodeComparatorCreator;
     }
 
-    public void setObjectNodeComparatorCreator(ComparatorCreator objectNodeComparatorCreator) {
+    public void setObjectNodeComparatorCreator(ComparatorCreator<ObjectNode> objectNodeComparatorCreator) {
         this.objectNodeComparatorCreator = objectNodeComparatorCreator;
     }
 
-    public ComparatorCreator getObjectPropertyNodeComparatorCreator() {
+    public ComparatorCreator<ObjectPropertyNode> getObjectPropertyNodeComparatorCreator() {
         return objectPropertyNodeComparatorCreator;
     }
 
-    public void setObjectPropertyNodeComparatorCreator(ComparatorCreator objectPropertyNodeComparatorCreator) {
+    public void setObjectPropertyNodeComparatorCreator(ComparatorCreator<ObjectPropertyNode> objectPropertyNodeComparatorCreator) {
         this.objectPropertyNodeComparatorCreator = objectPropertyNodeComparatorCreator;
     }
 
-    public ComparatorCreator getStringNodeComparatorCreator() {
+    public ComparatorCreator<StringNode> getStringNodeComparatorCreator() {
         return stringNodeComparatorCreator;
     }
 
-    public void setStringNodeComparatorCreator(ComparatorCreator stringNodeComparatorCreator) {
+    public void setStringNodeComparatorCreator(ComparatorCreator<StringNode> stringNodeComparatorCreator) {
         this.stringNodeComparatorCreator = stringNodeComparatorCreator;
     }
 }

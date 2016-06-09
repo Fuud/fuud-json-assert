@@ -1,6 +1,5 @@
 package org.fuud.json.asserts.impl.model
 
-import org.fuud.json.asserts.impl.parse.Context
 import org.fuud.json.asserts.impl.parse.Source
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -9,7 +8,7 @@ class StringNodeTest extends Specification {
     def "parse empty string"() {
         when:
             String json = '""';
-            StringNode stringNode = StringNode.parse(new Source(json), new Context())
+            StringNode stringNode = StringNode.parse(new Source(json))
         then:
             stringNode == new StringNode("");
     }
@@ -17,7 +16,7 @@ class StringNodeTest extends Specification {
     @Unroll
     def "invalid string"(String invalidString) {
         when:
-            StringNode.parse(new Source(invalidString), new Context())
+            StringNode.parse(new Source(invalidString))
         then:
             IOException e = thrown(IOException)
             e.getMessage() != null
@@ -39,7 +38,7 @@ class StringNodeTest extends Specification {
     @Unroll
     def "valid string"(String rawString, String expectedValue) {
         when:
-            StringNode stringNode = StringNode.parse(new Source(rawString), new Context())
+            StringNode stringNode = StringNode.parse(new Source(rawString))
         then:
             stringNode == new StringNode(expectedValue)
         where:

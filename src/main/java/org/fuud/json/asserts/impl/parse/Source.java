@@ -122,4 +122,9 @@ public class Source {
         source.position = startPosition; // to have correct position
         return source;
     }
+
+    @Override
+    public String toString() {
+        return "source=" + json.substring(position);
+    }
 }

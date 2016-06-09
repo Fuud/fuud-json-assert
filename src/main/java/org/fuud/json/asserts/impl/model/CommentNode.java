@@ -39,6 +39,14 @@ public class CommentNode {
         return result;
     }
 
+    public String toString() {
+        if (isMultiline) {
+            return "/*" + comment + "*/";
+        } else {
+            return "//" + comment;
+        }
+    }
+
     public String getComment() {
         return comment;
     }
@@ -55,7 +63,7 @@ public class CommentNode {
         return firstChar == '/';
     }
 
-    public static CommentNode parse(Source source, Context context) throws IOException {
+    public static CommentNode parse(Source source) throws IOException {
         final CharAndPosition firstCharAndPosition = source.readNextNonSpaceChar();
         final CharAndPosition secondCharAndPosition = source.readNextNonSpaceChar();
 

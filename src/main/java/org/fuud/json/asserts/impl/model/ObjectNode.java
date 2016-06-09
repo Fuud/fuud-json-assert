@@ -17,9 +17,16 @@ import static java.util.Collections.singletonList;
 
 public class ObjectNode extends ValueNode<ObjectNode> {
     private final Map<String, ObjectPropertyNode> children;
+    private final List<CommentNode> commentNodes;
 
     public ObjectNode(List<ObjectPropertyNode> children) {
-        super(new ObjectNodeComparator());
+        this(children, new ObjectNodeComparator(), new ArrayList<>());
+
+    }
+
+    public ObjectNode(List<ObjectPropertyNode> children, JsonComparator<ObjectNode> comparator, List<CommentNode> commentNodes) {
+        super(comparator);
+        this.commentNodes = commentNodes;
         this.children = new HashMap<>();
         for (ObjectPropertyNode child : children) {
             if (this.children.containsKey(child.getName())) {
@@ -33,9 +40,15 @@ public class ObjectNode extends ValueNode<ObjectNode> {
         return new ArrayList<>(children.values());
     }
 
+    public ObjectPropertyNode getChild(String name) {
+        return children.get(name);
+    }
+
     @Override
     public String toString() {
-        return "{\n" +
+        return "" +
+                commentNodes.stream().map(comment -> comment + "\n").collect(Collectors.joining()) +
+                "{\n" +
                 children.values().stream().map(Object::toString).map(Utils.addIdent).collect(Collectors.joining(",\n")) +
                 "\n}";
     }
@@ -56,7 +69,14 @@ public class ObjectNode extends ValueNode<ObjectNode> {
         return children.hashCode();
     }
 
-    public static ObjectNode parse(Source source, Context context) throws IOException {
+    public static ObjectNode parse(Source source) throws IOException {
+        return parse(source, new Context(), emptyList());
+    }
+
+    public static ObjectNode parse(Source source, Context context, List<CommentNode> commentNodes) throws IOException {
+        final List<String> args = commentNodes.stream().flatMap(commentNode -> commentNode.getAnnotations().stream()).collect(Collectors.toList());
+        final JsonComparator<ObjectNode> comparator = context.getObjectNodeComparatorCreator().create(args);
+
         final CharAndPosition startChar = source.readNextNonSpaceChar();
         if (startChar.getCharacter() != '{') {
             throw new JsonParseException("{", startChar);
@@ -65,12 +85,13 @@ public class ObjectNode extends ValueNode<ObjectNode> {
         final CharAndPosition mayBeEnd = source.lookupForNextNonSpaceChar();
         if (mayBeEnd.getCharacter() == '}') {
             source.readNextNonSpaceChar(); // skip up to '}'
-            return new ObjectNode(new ArrayList<>());
+            return new ObjectNode(new ArrayList<>(), comparator, commentNodes);
         }
 
         List<ObjectPropertyNode> propertyNodes = new ArrayList<>();
         while (true) {
-            final ObjectPropertyNode propertyNode = ObjectPropertyNode.parse(source, context);
+            final List<CommentNode> propertyComments = parseCommentNodes(source);
+            final ObjectPropertyNode propertyNode = ObjectPropertyNode.parse(source, context, propertyComments);
             propertyNodes.add(propertyNode);
 
             final CharAndPosition delimiterOrEndChar = source.readNextNonSpaceChar();
@@ -83,7 +104,9 @@ public class ObjectNode extends ValueNode<ObjectNode> {
             }
         }
 
-        return new ObjectNode(propertyNodes);
+        return new ObjectNode(propertyNodes,
+                comparator,
+                commentNodes);
     }
 
     public static boolean canStartWith(char firstChar) {

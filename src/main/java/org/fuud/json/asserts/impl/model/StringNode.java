@@ -11,28 +11,44 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
 public class StringNode extends ValueNode<StringNode> {
     private final String value;
+    private final List<CommentNode> commentNodes;
 
     public StringNode(String value) {
-        super(new StringNodeComparator());
+        this(value, new StringNodeComparator(), emptyList());
+    }
+
+    public StringNode(String value, JsonComparator<StringNode> comparator, List<CommentNode> commentNodes) {
+        super(comparator);
         this.value = Objects.requireNonNull(value);
+        this.commentNodes = commentNodes;
     }
 
     public String getValue() {
         return value;
     }
 
-    public static StringNode parse(Source source, Context context) throws IOException {
+    public static StringNode parse(Source source, Context context, List<CommentNode> commentNodes) throws IOException {
         final CharAndPosition startToken = source.readNextNonSpaceChar();
         if (startToken.getCharacter() != '"') {
             throw new JsonParseException("\"", startToken);
         }
-        return new StringNode(readAndUnescapeChars(source));
+        final List<String> args = commentNodes.stream().flatMap(commentNode -> commentNode.getAnnotations().stream()).collect(Collectors.toList());
+        return new StringNode(
+                readAndUnescapeChars(source),
+                context.getStringNodeComparatorCreator().create(args),
+                commentNodes
+        );
+    }
+
+    public static StringNode parse(Source source) throws IOException {
+        return parse(source, new Context(), emptyList());
     }
 
     private static String readAndUnescapeChars(Source source) throws IOException {
@@ -98,7 +114,9 @@ public class StringNode extends ValueNode<StringNode> {
 
     @Override
     public String toString() {
-        return '"' + value + '"';
+        return "" +
+                commentNodes.stream().map(comment -> comment + "\n").collect(Collectors.joining()) +
+                '"' + value + '"';
     }
 
     public static boolean canStartWith(char firstChar) {

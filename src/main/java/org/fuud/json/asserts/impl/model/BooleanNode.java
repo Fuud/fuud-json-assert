@@ -8,17 +8,25 @@ import org.fuud.json.asserts.impl.parse.JsonParseException;
 import org.fuud.json.asserts.impl.parse.Source;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
 public class BooleanNode extends ValueNode<BooleanNode> {
     private final boolean value;
+    private final List<CommentNode> commentNodes;
 
     public BooleanNode(boolean value) {
-        super(new BooleanNodeComparator());
+        this(value, new BooleanNodeComparator(), new ArrayList<>());
+    }
+
+    public BooleanNode(boolean value, JsonComparator<BooleanNode> comparator, List<CommentNode> commentNodes) {
+        super(comparator);
         this.value = value;
+        this.commentNodes = commentNodes;
     }
 
     public boolean isValue() {
@@ -27,7 +35,9 @@ public class BooleanNode extends ValueNode<BooleanNode> {
 
     @Override
     public String toString() {
-        return Boolean.toString(value);
+        return "" +
+                commentNodes.stream().map(comment -> comment + "\n").collect(Collectors.joining()) +
+                value;
     }
 
     @Override
@@ -46,20 +56,25 @@ public class BooleanNode extends ValueNode<BooleanNode> {
         return (value ? 1 : 0);
     }
 
-    public static BooleanNode parse(Source source, Context context) throws IOException {
+    public static BooleanNode parse(Source source) throws IOException {
+        return parse(source, new Context(), emptyList());
+    }
+
+    public static BooleanNode parse(Source source, Context context, List<CommentNode> commentNodes) throws IOException {
         final CharAndPosition firstCharAndPos = source.readNextNonSpaceChar();
         final char char1 = firstCharAndPos.getCharacter();
         final char char2 = source.readNextChar().getCharacter();
         final char char3 = source.readNextChar().getCharacter();
         final char char4 = source.readNextChar().getCharacter();
 
+        final List<String> args = commentNodes.stream().flatMap(commentNode -> commentNode.getAnnotations().stream()).collect(Collectors.toList());
         if ("true".equals("" + char1 + char2 + char3 + char4)) {
-            return new BooleanNode(true);
+            return new BooleanNode(true, context.getBooleanNodeComparatorCreator().create(args), commentNodes);
         }
 
         final char char5 = source.readNextChar().getCharacter();
         if ("false".equals("" + char1 + char2 + char3 + char4 + char5)) {
-            return new BooleanNode(false);
+            return new BooleanNode(false, context.getBooleanNodeComparatorCreator().create(args), commentNodes);
         }
 
         throw new JsonParseException("Invalid boolean value " + char1 + char2 + char3 + char4 + char5 + " at position " + firstCharAndPos.getPosition());

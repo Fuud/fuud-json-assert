@@ -19,11 +19,17 @@ import static java.util.Collections.singletonList;
 public class ObjectPropertyNode extends Node<ObjectPropertyNode> {
     private final String name;
     private final Node<?> value;
+    private final List<CommentNode> commentNodes;
 
     public ObjectPropertyNode(String name, Node<?> value) {
-        super(new ObjectPropertyNodeComparator());
+        this(name, value, new ObjectPropertyNodeComparator(), emptyList());
+    }
+
+    public ObjectPropertyNode(String name, Node<?> value, JsonComparator<ObjectPropertyNode> comparator, List<CommentNode> commentNodes) {
+        super(comparator);
         this.name = Objects.requireNonNull(name);
         this.value = Objects.requireNonNull(value);
+        this.commentNodes = commentNodes;
     }
 
     public String getName() {
@@ -36,7 +42,9 @@ public class ObjectPropertyNode extends Node<ObjectPropertyNode> {
 
     @Override
     public String toString() {
-        return name +
+        return "" +
+                commentNodes.stream().map(comment -> comment + "\n").collect(Collectors.joining()) +
+                name +
                 ":" +
                 Utils.addIdentExceptFirstLine.apply(
                         value.toString()
@@ -62,15 +70,24 @@ public class ObjectPropertyNode extends Node<ObjectPropertyNode> {
         return result;
     }
 
-    public static ObjectPropertyNode parse(Source source, Context context) throws IOException {
-        final StringNode nameNode = StringNode.parse(source, context);
+    public static ObjectPropertyNode parse(Source source) throws IOException {
+        return parse(source, new Context(), emptyList());
+    }
+
+    public static ObjectPropertyNode parse(Source source, Context context, List<CommentNode> commentNodes) throws IOException {
+        final StringNode nameNode = StringNode.parse(source);
         final CharAndPosition delimiter = source.readNextNonSpaceChar();
         if (delimiter.getCharacter() != ':') {
             throw new JsonParseException(":", delimiter);
         }
 
         final ValueNode valueNode = ValueNode.parse(source, context);
-        return new ObjectPropertyNode(nameNode.getValue(), valueNode);
+        final List<String> args = commentNodes.stream().flatMap(commentNode -> commentNode.getAnnotations().stream()).collect(Collectors.toList());
+        return new ObjectPropertyNode(
+                nameNode.getValue(),
+                valueNode,
+                context.getObjectPropertyNodeComparatorCreator().create(args),
+                commentNodes);
     }
 
     public static class ObjectPropertyNodeComparator implements JsonComparator<ObjectPropertyNode> {
