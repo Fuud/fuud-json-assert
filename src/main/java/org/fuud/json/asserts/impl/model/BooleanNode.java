@@ -3,6 +3,7 @@ package org.fuud.json.asserts.impl.model;
 import org.fuud.json.asserts.impl.diff.Difference;
 import org.fuud.json.asserts.impl.diff.JsonComparator;
 import org.fuud.json.asserts.impl.parse.CharAndPosition;
+import org.fuud.json.asserts.impl.parse.Context;
 import org.fuud.json.asserts.impl.parse.JsonParseException;
 import org.fuud.json.asserts.impl.parse.Source;
 
@@ -45,7 +46,7 @@ public class BooleanNode extends ValueNode<BooleanNode> {
         return (value ? 1 : 0);
     }
 
-    public static BooleanNode parse(Source source) throws IOException {
+    public static BooleanNode parse(Source source, Context context) throws IOException {
         final CharAndPosition firstCharAndPos = source.readNextNonSpaceChar();
         final char char1 = firstCharAndPos.getCharacter();
         final char char2 = source.readNextChar().getCharacter();

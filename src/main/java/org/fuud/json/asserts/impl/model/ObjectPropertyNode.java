@@ -3,6 +3,7 @@ package org.fuud.json.asserts.impl.model;
 import org.fuud.json.asserts.impl.diff.Difference;
 import org.fuud.json.asserts.impl.diff.JsonComparator;
 import org.fuud.json.asserts.impl.parse.CharAndPosition;
+import org.fuud.json.asserts.impl.parse.Context;
 import org.fuud.json.asserts.impl.parse.JsonParseException;
 import org.fuud.json.asserts.impl.parse.Source;
 import org.fuud.json.asserts.impl.util.Utils;
@@ -61,14 +62,14 @@ public class ObjectPropertyNode extends Node<ObjectPropertyNode> {
         return result;
     }
 
-    public static ObjectPropertyNode parse(Source source) throws IOException {
-        final StringNode nameNode = StringNode.parse(source);
+    public static ObjectPropertyNode parse(Source source, Context context) throws IOException {
+        final StringNode nameNode = StringNode.parse(source, context);
         final CharAndPosition delimiter = source.readNextNonSpaceChar();
         if (delimiter.getCharacter() != ':') {
             throw new JsonParseException(":", delimiter);
         }
 
-        final ValueNode valueNode = ValueNode.parse(source);
+        final ValueNode valueNode = ValueNode.parse(source, context);
         return new ObjectPropertyNode(nameNode.getValue(), valueNode);
     }
 

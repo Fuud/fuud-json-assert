@@ -2,6 +2,7 @@ package org.fuud.json.asserts.impl.model.compare
 
 import org.fuud.json.asserts.impl.diff.Difference
 import org.fuud.json.asserts.impl.model.*
+import org.fuud.json.asserts.impl.parse.Context
 import org.fuud.json.asserts.impl.parse.Source
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -34,8 +35,8 @@ class ObjectNodeCompareTest extends Specification {
     @Unroll
     def "not equals"(String leftJson, String rightJson, List<Difference> expectedDiff) {
         setup:
-            ObjectNode left = ObjectNode.parse(new Source(leftJson))
-            ObjectNode right = ObjectNode.parse(new Source(rightJson))
+            ObjectNode left = ObjectNode.parse(new Source(leftJson), new Context())
+            ObjectNode right = ObjectNode.parse(new Source(rightJson), new Context())
         when:
             List<Difference> differences = left.compare(right)
         then:

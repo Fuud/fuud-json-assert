@@ -3,6 +3,7 @@ package org.fuud.json.asserts.impl.model;
 import org.fuud.json.asserts.impl.diff.Difference;
 import org.fuud.json.asserts.impl.diff.JsonComparator;
 import org.fuud.json.asserts.impl.parse.CharAndPosition;
+import org.fuud.json.asserts.impl.parse.Context;
 import org.fuud.json.asserts.impl.parse.JsonParseException;
 import org.fuud.json.asserts.impl.parse.Source;
 import org.fuud.json.asserts.impl.util.Utils;
@@ -55,7 +56,7 @@ public class ObjectNode extends ValueNode<ObjectNode> {
         return children.hashCode();
     }
 
-    public static ObjectNode parse(Source source) throws IOException {
+    public static ObjectNode parse(Source source, Context context) throws IOException {
         final CharAndPosition startChar = source.readNextNonSpaceChar();
         if (startChar.getCharacter() != '{') {
             throw new JsonParseException("{", startChar);
@@ -69,7 +70,7 @@ public class ObjectNode extends ValueNode<ObjectNode> {
 
         List<ObjectPropertyNode> propertyNodes = new ArrayList<>();
         while (true) {
-            final ObjectPropertyNode propertyNode = ObjectPropertyNode.parse(source);
+            final ObjectPropertyNode propertyNode = ObjectPropertyNode.parse(source, context);
             propertyNodes.add(propertyNode);
 
             final CharAndPosition delimiterOrEndChar = source.readNextNonSpaceChar();

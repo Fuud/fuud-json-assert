@@ -2,8 +2,10 @@ package org.fuud.json.asserts.impl.model;
 
 import org.fuud.json.asserts.impl.diff.Difference;
 import org.fuud.json.asserts.impl.diff.JsonComparator;
+import org.fuud.json.asserts.impl.parse.Context;
 import org.fuud.json.asserts.impl.parse.JsonParseException;
 import org.fuud.json.asserts.impl.parse.Source;
+import org.fuud.json.asserts.impl.parse.TextAndNextChar;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -42,10 +44,10 @@ public class NumberNode extends ValueNode<NumberNode> {
         return value.hashCode();
     }
 
-    public static NumberNode parse(Source source) throws IOException {
+    public static NumberNode parse(Source source, Context context) throws IOException {
         source.skipWhitespaces();
         final int startPosition = source.getPosition();
-        String numberAsString = source.readUntilEofOr(
+        TextAndNextChar numberAsString = source.readUntilEofOr(
                 character ->
                         Character.isWhitespace(character) ||
                                 character == '"' ||
@@ -56,7 +58,7 @@ public class NumberNode extends ValueNode<NumberNode> {
                                 character == '}');
         final BigDecimal value;
         try {
-            value = new BigDecimal(numberAsString);
+            value = new BigDecimal(numberAsString.getText());
         } catch (NumberFormatException e) {
             throw new JsonParseException("Can not parse number value " + numberAsString + " starting from position " + startPosition, e);
         }

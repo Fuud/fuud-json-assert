@@ -1,5 +1,6 @@
 package org.fuud.json.asserts.impl.model
 
+import org.fuud.json.asserts.impl.parse.Context
 import org.fuud.json.asserts.impl.parse.Source
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -9,7 +10,7 @@ class NullNodeTest extends Specification {
     @Unroll
     def "valid value"(String validJson) {
         when:
-            NullNode nullNode = NullNode.parse(new Source(validJson))
+            NullNode nullNode = NullNode.parse(new Source(validJson), new Context())
         then:
             nullNode == new NullNode()
         where:
@@ -22,7 +23,7 @@ class NullNodeTest extends Specification {
     @Unroll
     def "invalid value"(String validJson) {
         when:
-            NullNode.parse(new Source(validJson))
+            NullNode.parse(new Source(validJson), new Context())
         then:
             thrown(IOException)
         where:

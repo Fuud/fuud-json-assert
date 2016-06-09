@@ -1,5 +1,6 @@
 package org.fuud.json.asserts.impl.model
 
+import org.fuud.json.asserts.impl.parse.Context
 import org.fuud.json.asserts.impl.parse.Source
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -9,7 +10,7 @@ class ObjectNodeTest extends Specification {
     @Unroll
     def "valid objects"(String json, ObjectNode expected) {
         when:
-            ObjectNode parsed = ObjectNode.parse(new Source(json))
+            ObjectNode parsed = ObjectNode.parse(new Source(json), new Context())
         then:
             parsed == expected
         where:

@@ -1,5 +1,6 @@
 package org.fuud.json.asserts.impl.model
 
+import org.fuud.json.asserts.impl.parse.Context
 import org.fuud.json.asserts.impl.parse.Source
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -9,7 +10,7 @@ class BooleanNodeTest extends Specification {
     @Unroll
     def "valid value"(String validJson, boolean expectedValue) {
         when:
-            BooleanNode booleanNode = BooleanNode.parse(new Source(validJson))
+            BooleanNode booleanNode = BooleanNode.parse(new Source(validJson), new Context())
         then:
             booleanNode == new BooleanNode(expectedValue)
         where:
@@ -24,7 +25,7 @@ class BooleanNodeTest extends Specification {
     @Unroll
     def "invalid value"(String validJson) {
         when:
-            BooleanNode.parse(new Source(validJson))
+            BooleanNode.parse(new Source(validJson), new Context())
         then:
             thrown(IOException)
         where:

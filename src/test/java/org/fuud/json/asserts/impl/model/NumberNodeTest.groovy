@@ -1,5 +1,6 @@
 package org.fuud.json.asserts.impl.model
 
+import org.fuud.json.asserts.impl.parse.Context
 import org.fuud.json.asserts.impl.parse.Source
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -9,7 +10,7 @@ class NumberNodeTest extends Specification {
     @Unroll
     def "invalid number"(String invalidJson) {
         when:
-            NumberNode.parse(new Source(invalidJson))
+            NumberNode.parse(new Source(invalidJson), new Context())
         then:
             IOException e = thrown(IOException)
             e.getMessage() != null
@@ -23,11 +24,11 @@ class NumberNodeTest extends Specification {
     @Unroll
     def "valid number"(String rawString, String expectedValue) {
         when:
-            NumberNode numberNode = NumberNode.parse(new Source(rawString))
-            NumberNode numberNodeQuoute = NumberNode.parse(new Source(rawString + "\""))
-            NumberNode numberNodeSpace = NumberNode.parse(new Source(rawString + " "))
-            NumberNode numberNodeNewLine = NumberNode.parse(new Source(rawString + "\n"))
-            NumberNode numberNodeComma = NumberNode.parse(new Source(rawString + ","))
+            NumberNode numberNode = NumberNode.parse(new Source(rawString), new Context())
+            NumberNode numberNodeQuoute = NumberNode.parse(new Source(rawString + "\""), new Context())
+            NumberNode numberNodeSpace = NumberNode.parse(new Source(rawString + " "), new Context())
+            NumberNode numberNodeNewLine = NumberNode.parse(new Source(rawString + "\n"), new Context())
+            NumberNode numberNodeComma = NumberNode.parse(new Source(rawString + ","), new Context())
         then:
             NumberNode expected = new NumberNode(new BigDecimal(expectedValue))
             numberNode == expected

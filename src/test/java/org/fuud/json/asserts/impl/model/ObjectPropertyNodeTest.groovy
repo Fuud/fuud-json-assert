@@ -1,5 +1,6 @@
 package org.fuud.json.asserts.impl.model
 
+import org.fuud.json.asserts.impl.parse.Context
 import org.fuud.json.asserts.impl.parse.Source
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -8,7 +9,7 @@ import spock.lang.Unroll
 class ObjectPropertyNodeTest extends Specification {
     def "test valid object properties #json"(String json, ObjectPropertyNode expected) {
         when:
-            ObjectPropertyNode parsed = ObjectPropertyNode.parse(new Source(json))
+            ObjectPropertyNode parsed = ObjectPropertyNode.parse(new Source(json), new Context())
         then:
             parsed == expected
         where:

@@ -3,6 +3,7 @@ package org.fuud.json.asserts.impl.model;
 import org.fuud.json.asserts.impl.diff.Difference;
 import org.fuud.json.asserts.impl.diff.JsonComparator;
 import org.fuud.json.asserts.impl.parse.CharAndPosition;
+import org.fuud.json.asserts.impl.parse.Context;
 import org.fuud.json.asserts.impl.parse.Source;
 
 import java.io.IOException;
@@ -21,7 +22,7 @@ public class NullNode extends ValueNode<NullNode> {
         return "null";
     }
 
-    public static NullNode parse(Source source) throws IOException {
+    public static NullNode parse(Source source, Context context) throws IOException {
         final CharAndPosition firstCharAndPosition = source.readNextNonSpaceChar();
         final char char1 = firstCharAndPosition.getCharacter();
         final char char2 = source.readNextChar().getCharacter();

@@ -38,10 +38,20 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>15.0</version>
+        </dependency>
+        <dependency>
             <groupId>org.spockframework</groupId>
             <artifactId>spock-core-fuud-fork</artifactId>
             <version>1.0.4-groovy-2.3</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>cglib</groupId>
+            <artifactId>cglib-nodep</artifactId>
+            <version>2.2.2</version>
         </dependency>
     </dependencies>
 
